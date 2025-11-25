@@ -3,11 +3,15 @@ import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Sidebar from './Sidebar';
 
-function DashboardLayout({ onLogout }) {
+function DashboardLayout() {
+    // Không cần nhận prop { onLogout } nữa
     return (
         <div id="dashboard-page">
-            <Header onLogout={onLogout} />
+            {/* Không cần truyền onLogout vào Header nữa */}
+            <Header />
+            
             <Sidebar />
+            
             <main className="dashboard-main">
                 {/* Outlet là nơi các trang con (Chat, CV, Jobs) sẽ được hiển thị */}
                 <Outlet />

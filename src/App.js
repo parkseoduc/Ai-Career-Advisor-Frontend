@@ -1,6 +1,7 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
+import { useAuth } from './context/AuthContext'; // 1. Import Context
 
 // Import các components
 import LoginPage from './components/auth/LoginPage';
@@ -9,50 +10,48 @@ import ChatPage from './components/pages/ChatPage';
 import CVPage from './components/pages/CVPage';
 import JobSearchPage from './components/pages/JobSearchPage';
 
-// Component này sẽ bao bọc các trang cần đăng nhập
-function ProtectedRoutes() {
-    // Tạm thời dùng state để kiểm tra đăng nhập. Sau này sẽ thay bằng logic thật.
-    const [isLoggedIn, setIsLoggedIn] = React.useState(true); // Đặt là true để test
+// --- COMPONENT BẢO VỆ ROUTE ---
+// "Bác bảo vệ": Kiểm tra xem có vé (user) không? Có thì cho vào, không thì đá về Login
+const ProtectedRoute = () => {
+    const { user, loading } = useAuth();
 
-    const handleLogout = () => {
-        setIsLoggedIn(false);
-    };
+    // Nếu đang tải thông tin từ LocalStorage (khi F5) thì chưa làm gì cả (tránh đá oan)
+    if (loading) return null; // Hoặc return <div className="loading">Loading...</div>
 
-    if (!isLoggedIn) {
-        return <Navigate to="/login" />;
+    // Nếu không có user -> Đá về Login
+    if (!user) {
+        return <Navigate to="/login" replace />;
     }
 
-    return <DashboardLayout onLogout={handleLogout} />;
-}
+    // Nếu có user -> Render DashboardLayout (Layout này sẽ chứa Outlet để hiện các trang con)
+    return <DashboardLayout />;
+};
 
 function App() {
-    const [isLoggedIn, setIsLoggedIn] = React.useState(false);
-
-    const handleLogin = () => {
-        setIsLoggedIn(true);
-    };
-
     return (
-        <Router>
+        
             <Routes>
-                {/* Route cho trang đăng nhập */}
-                <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+                {/* 1. Route Đăng nhập (Công khai) */}
+                <Route path="/login" element={<LoginPage />} />
 
-                {/* Route bao bọc cho các trang cần đăng nhập */}
-                <Route path="/" element={<ProtectedRoutes />}>
-                    {/* Các trang con sẽ được render vào <Outlet /> của DashboardLayout */}
-                    <Route path="dashboard/chat" element={<ChatPage />} />
-                    <Route path="dashboard/cv" element={<CVPage />} />
-                    <Route path="dashboard/jobs" element={<JobSearchPage />} />
+                {/* 2. Các Route cần bảo vệ (Phải đăng nhập mới vào được) */}
+                {/* Khi vào /dashboard, nó sẽ chạy qua ProtectedRoute trước */}
+                <Route path="/dashboard" element={<ProtectedRoute />}>
                     
-                    {/* Mặc định chuyển đến trang chat khi vào /dashboard */}
-                    <Route path="dashboard" element={<Navigate to="dashboard/chat" />} />
+                    {/* Route mặc định: Vào /dashboard tự nhảy sang /dashboard/chat */}
+                    <Route index element={<Navigate to="chat" replace />} />
+                    
+                    {/* Các trang con */}
+                    <Route path="chat" element={<ChatPage />} />
+                    <Route path="cv" element={<CVPage />} />
+                    <Route path="jobs" element={<JobSearchPage />} />
                 </Route>
 
-                {/* Chuyển hướng về trang login nếu chưa đăng nhập */}
-                <Route path="*" element={<Navigate to={isLoggedIn ? "/dashboard/chat" : "/login"} />} />
+                {/* 3. Route 404 hoặc Redirect */}
+                {/* Nếu người dùng nhập linh tinh, tự động đá về dashboard (nếu đã login) hoặc login */}
+                <Route path="*" element={<Navigate to="/dashboard/chat" replace />} />
             </Routes>
-        </Router>
+        
     );
 }
 
