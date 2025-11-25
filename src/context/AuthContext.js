@@ -19,8 +19,6 @@ export const AuthProvider = ({ children }) => {
                 const storedUser = localStorage.getItem('user'); 
                 
                 if (storedUser) {
-                    // --- CHỖ NÀY CÓ THỂ GỌI API ĐỂ VALIDATE TOKEN NẾU CẦN ---
-                    // Ví dụ: const res = await api.getProfile(token);
                     
                     setUser(JSON.parse(storedUser));
                 }
@@ -36,17 +34,13 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     // --- HÀM LOGIN ---
-    // Hàm này sẽ được gọi từ LoginPage sau khi bạn gọi API thành công bên đó
     const login = (userData) => {
         // 1. Lưu vào State của React
         setUser(userData);
         
         // 2. Lưu vào LocalStorage để không bị mất khi reload trang
-        // Lưu ý: userData nên chứa cả token nếu có (ví dụ: {name: 'A', token: 'xyz...'})
         localStorage.setItem('user', JSON.stringify(userData)); 
         
-        // --- NẾU MUỐN LƯU TOKEN RIÊNG ---
-        // localStorage.setItem('token', userData.token);
     };
 
     // --- HÀM LOGOUT ---
@@ -56,9 +50,7 @@ export const AuthProvider = ({ children }) => {
         
         // 2. Xóa LocalStorage
         localStorage.removeItem('user');
-        // localStorage.removeItem('token'); // Nếu có lưu token riêng
         
-        // --- CHỖ NÀY CÓ THỂ GỌI API LOGOUT NẾU BACKEND YÊU CẦU ---
     };
 
     return (
@@ -69,7 +61,6 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
-// 3. Hook custom để dùng nhanh ở các file khác
 export const useAuth = () => {
     return useContext(AuthContext);
 };

@@ -9,21 +9,24 @@ import DashboardLayout from './components/dashboard/DashboardLayout';
 import ChatPage from './components/pages/ChatPage';
 import CVPage from './components/pages/CVPage';
 import JobSearchPage from './components/pages/JobSearchPage';
+import MyApplicationsPage from './components/pages/MyApplicationsPage';
+import LearningPage from './components/pages/LearningPage';
+import AssessmentPage from './components/pages/AssessmentPage';
+import AdvisorPage from './components/pages/AdvisorPage';
 
-// --- COMPONENT BẢO VỆ ROUTE ---
-// "Bác bảo vệ": Kiểm tra xem có vé (user) không? Có thì cho vào, không thì đá về Login
+
 const ProtectedRoute = () => {
     const { user, loading } = useAuth();
 
     // Nếu đang tải thông tin từ LocalStorage (khi F5) thì chưa làm gì cả (tránh đá oan)
-    if (loading) return null; // Hoặc return <div className="loading">Loading...</div>
+    if (loading) return null; 
 
     // Nếu không có user -> Đá về Login
     if (!user) {
         return <Navigate to="/login" replace />;
     }
 
-    // Nếu có user -> Render DashboardLayout (Layout này sẽ chứa Outlet để hiện các trang con)
+    // Nếu có user -> Render DashboardLayout
     return <DashboardLayout />;
 };
 
@@ -45,6 +48,10 @@ function App() {
                     <Route path="chat" element={<ChatPage />} />
                     <Route path="cv" element={<CVPage />} />
                     <Route path="jobs" element={<JobSearchPage />} />
+                    <Route path="applications" element={<MyApplicationsPage />} />
+                    <Route path="learning" element={<LearningPage />} />
+                    <Route path="assessments" element={<AssessmentPage />} />
+                    <Route path="advisors" element={<AdvisorPage />} />
                 </Route>
 
                 {/* 3. Route 404 hoặc Redirect */}
