@@ -29,3 +29,24 @@ export const updateCVProfileApi = async (profileData, token) => {
         return data;
     } catch (error) { throw error; }
 };
+
+export const uploadCVApi = async (file, token) => {
+    try {
+        const formData = new FormData();
+        formData.append("file", file); // Key 'file' phải khớp với backend
+
+        const response = await fetch(`${BASE_URL}/job-seekers/upload-cv`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+                // Lưu ý: KHÔNG thêm Content-Type: application/json ở đây
+                // Để trình duyệt tự động set multipart/form-data
+            },
+            body: formData
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || 'Lỗi upload CV');
+        return data;
+    } catch (error) { throw error; }
+};
