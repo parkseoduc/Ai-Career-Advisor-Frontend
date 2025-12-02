@@ -4,16 +4,17 @@ import Header from './Header';
 import Sidebar from './Sidebar';
 
 function DashboardLayout() {
-    // Không cần nhận prop { onLogout } nữa
     return (
-        <div id="dashboard-page">
-            {/* Không cần truyền onLogout vào Header nữa */}
-            <Header />
+        // Container chính: sử dụng flexbox, chiếm toàn bộ chiều cao màn hình
+        <div className="flex h-screen bg-gray-100">
             
+            {/* Header và Sidebar sẽ được định vị cố định (fixed position) trong các file của chúng */}
+            <Header />
             <Sidebar />
             
-            <main className="dashboard-main">
-                {/* Outlet là nơi các trang con (Chat, CV, Jobs) sẽ được hiển thị */}
+            {/* Khu vực nội dung chính */}
+            <main className="flex-1 ml-[250px] mt-[60px] p-8 overflow-y-auto">
+                {/* Outlet là nơi các trang con (JobSearch, Learning, Chat...) sẽ được hiển thị */}
                 <Outlet />
             </main>
         </div>

@@ -1,87 +1,72 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext'; // 1. Import Context
+import { useAuth } from '../../context/AuthContext';
+
+// --- THÊM IMPORT ICON ---
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 
 function Header() {
-    // 2. Lấy user và hàm logout từ Context
     const { user, logout } = useAuth();
     const navigate = useNavigate();
-    
-    // State để bật/tắt menu con khi bấm vào ảnh
     const [showMenu, setShowMenu] = useState(false);
 
     const handleLogout = () => {
-        logout(); // Xóa token
-        navigate('/login'); // Quay về trang login
+        logout();
+        navigate('/login');
     };
 
-    // Xử lý khi bấm vào ảnh đại diện
     const handleAvatarClick = () => {
         if (!user) {
-            // Nếu chưa đăng nhập -> Chuyển sang trang Login
             navigate('/login');
         } else {
-            // Nếu đã đăng nhập -> Bật/Tắt menu Đăng xuất
             setShowMenu(!showMenu);
         }
     };
 
     return (
-        <header className="dashboard-header">
+        <header className="fixed top-0 left-0 right-0 h-[60px] bg-white border-b border-dark-200 flex justify-between items-center px-6 z-50">
             <div className="logo">
-                <h1>JobFinder AI</h1>
+                <h1 className="text-2xl font-bold text-primary-600">JobFinder AI</h1>
             </div>
             
-            <div className="user-info" style={{ position: 'relative' }}>
+            <div className="user-info relative flex items-center gap-3">
                 {user ? (
-                    // --- TRƯỜNG HỢP 1: ĐÃ ĐĂNG NHẬP ---
                     <>
-                        {/* Hiện tên người dùng lấy từ API */}
-                        <span>Chào, {user.full_name || user.name || user.email}</span>
+                        <span className="text-gray-700">Chào, {user.full_name || user.name || user.email}</span>
                         
                         <img 
                             src="https://i.pravatar.cc/150?img=5" 
                             alt="User Avatar" 
                             onClick={handleAvatarClick}
-                            style={{ cursor: 'pointer', border: '2px solid #4CAF50' }} // Thêm viền xanh để biết đang online
+                            className="w-9 h-9 rounded-full cursor-pointer border-2 border-success-500 object-cover"
                         />
                         
-                        {/* Menu con hiện ra khi bấm vào ảnh */}
                         {showMenu && (
-                            <div style={{
-                                position: 'absolute',
-                                right: '0',
-                                top: '60px',
-                                backgroundColor: 'white',
-                                boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-                                borderRadius: '5px',
-                                padding: '10px',
-                                zIndex: 100,
-                                minWidth: '150px'
-                            }}>
+                            <div className="absolute right-0 top-full mt-2 bg-white shadow-lg rounded-md p-2.5 z-40 min-w-[150px] transition-all duration-200">
                                 <div 
                                     onClick={handleLogout} 
-                                    style={{ cursor: 'pointer', color: '#d9534f', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                    className="cursor-pointer text-red-500 flex items-center gap-2 hover:bg-red-50 p-2 rounded"
                                 >
-                                    <i className="fas fa-sign-out-alt"></i> Đăng xuất
+                                    {/* --- THAY THẾ ICON --- */}
+                                    <FontAwesomeIcon icon={faSignOutAlt} /> Đăng xuất
                                 </div>
                             </div>
                         )}
                     </>
                 ) : (
-                    // --- TRƯỜNG HỢP 2: CHƯA ĐĂNG NHẬP (KHÁCH) ---
                     <>
                         <span 
                             onClick={() => navigate('/login')} 
-                            style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                            className="cursor-pointer underline text-primary-600 hover:text-primary-800 transition-colors"
                         >
                             Đăng nhập ngay
                         </span>
                         <img 
-                            src="https://cdn-icons-png.flaticon.com/512/149/149071.png" // Ảnh icon người màu xám
+                            src="https://cdn-icons-png.flaticon.com/512/149/149071.png" 
                             alt="Guest Avatar" 
                             onClick={handleAvatarClick}
-                            style={{ cursor: 'pointer', opacity: 0.7 }}
+                            className="w-9 h-9 rounded-full cursor-pointer opacity-70"
                         />
                     </>
                 )}

@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-// 1. Chỉ giữ lại 1 dòng import duy nhất cho api
 import { getCVProfileApi, updateCVProfileApi, uploadCVApi } from '../../api/cv_api';
+
+// --- THÊM IMPORT ICON ---
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 function CVPage() {
     const { user } = useAuth();
     const [loading, setLoading] = useState(false);
 
-    // --- State cho tính năng Upload CV ---
     const [recommendedJobs, setRecommendedJobs] = useState([]);
     const [uploading, setUploading] = useState(false);
 
-    // --- State cho Form nhập liệu ---
     const [cvData, setCvData] = useState({
         name: '',
         email: '',
@@ -21,7 +22,6 @@ function CVPage() {
         experience: { company: '', position: '', duration: '', description: '' }
     });
 
-    // Load dữ liệu khi vào trang
     useEffect(() => {
         if (user && user.token) {
             setCvData(prev => ({ ...prev, email: user.email }));
@@ -43,7 +43,6 @@ function CVPage() {
         }
     }, [user]);
 
-    // Xử lý thay đổi input
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         if (name.startsWith('experience.')) {
@@ -57,7 +56,6 @@ function CVPage() {
         }
     };
 
-    // Xử lý lưu form thủ công
     const handleSave = async () => {
         setLoading(true);
         try {
@@ -77,7 +75,6 @@ function CVPage() {
         }
     };
 
-    // Xử lý Upload CV
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -87,12 +84,10 @@ function CVPage() {
             const result = await uploadCVApi(file, user.token);
             alert("✅ " + result.message);
 
-            // Nếu tìm thấy công việc phù hợp -> Hiển thị
             if (result.jobs && result.jobs.length > 0) {
                 setRecommendedJobs(result.jobs);
             }
 
-            // (Tùy chọn) Tự động điền tóm tắt vào ô mục tiêu nghề nghiệp
             if (result.summary) {
                 setCvData(prev => ({ ...prev, objective: result.summary }));
             }
@@ -105,104 +100,102 @@ function CVPage() {
     };
 
     return (
-        <section id="cv-content" className="content-section">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h2>Quản lý Hồ sơ (CV)</h2>
-            </div>
+        <section className="min-h-screen bg-gradient-to-br from-dark-50 to-accent-50 py-12">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 className="text-4xl font-extrabold text-center text-dark-800 mb-8">Quản lý Hồ sơ (CV)</h2>
 
-            {/* --- KHU VỰC UPLOAD CV --- */}
-            <div style={{ background: '#e3f2fd', padding: '20px', borderRadius: '8px', marginBottom: '30px', border: '1px dashed #007bff' }}>
-                <h3>📄 Tải lên CV (PDF) để tìm việc nhanh</h3>
-                <p style={{ fontSize: '14px', color: '#555' }}>Hệ thống sẽ đọc CV của bạn và tự động gợi ý công việc phù hợp nhất.</p>
+                {/* --- KHU VỰC UPLOAD CV --- */}
+                <div className="bg-blue-50 p-6 rounded-xl border-2 border-dashed border-primary-300 mb-8">
+                    <h3 className="text-xl font-bold text-dark-800 mb-2">📄 Tải lên CV (PDF) để tìm việc nhanh</h3>
+                    <p className="text-sm text-dark-600 mb-4">Hệ thống sẽ đọc CV của bạn và tự động gợi ý công việc phù hợp nhất.</p>
 
-                <input
-                    type="file"
-                    accept="application/pdf"
-                    onChange={handleFileUpload}
-                    disabled={uploading}
-                    style={{ marginTop: '10px' }}
-                />
+                    <input
+                        type="file"
+                        accept="application/pdf"
+                        onChange={handleFileUpload}
+                        disabled={uploading}
+                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
+                    />
 
-                {uploading && <p style={{ color: 'blue', marginTop: '10px' }}>🤖 AI đang đọc CV của bạn...</p>}
+                    {uploading && <p className="text-primary-600 mt-4">🤖 AI đang đọc CV của bạn...</p>}
 
-                {recommendedJobs.length > 0 && (
-                    <div style={{ marginTop: '20px' }}>
-                        <h4 style={{ color: '#28a745' }}>✨ Công việc phù hợp với CV của bạn:</h4>
-                        <div style={{ display: 'grid', gap: '10px', marginTop: '10px' }}>
-                            {recommendedJobs.map(job => (
-                                <div key={job._id || job.id} style={{ background: 'white', padding: '10px', borderRadius: '5px', borderLeft: '4px solid #28a745' }}>
-                                    <strong>{job.title}</strong> - {job.company}
-                                    <br />
-                                    
-                                    <small>
-                                        💰 {typeof job.salary_range === 'object' && job.salary_range !== null
-                                            ? `${job.salary_range.min} - ${job.salary_range.max} ${job.salary_range.currency}`
-                                            : job.salary_range || "Thỏa thuận"}
-                                        | 📍 {job.location}
-                                    </small>
-                                </div>
-                            ))}
+                    {recommendedJobs.length > 0 && (
+                        <div className="mt-6">
+                            <h4 className="text-lg font-bold text-success-600 mb-3">✨ Công việc phù hợp với CV của bạn:</h4>
+                            <div className="space-y-3">
+                                {recommendedJobs.map(job => (
+                                    <div key={job._id || job.id} className="bg-white p-4 rounded-lg shadow border-l-4 border-success-500">
+                                        <strong className="text-dark-800">{job.title}</strong> - <span className="text-dark-600">{job.company}</span>
+                                        <br />
+                                        <small className="text-dark-500">
+                                            💰 {typeof job.salary_range === 'object' && job.salary_range !== null
+                                                ? `${job.salary_range.min} - ${job.salary_range.max} ${job.salary_range.currency}`
+                                                : job.salary_range || "Thỏa thuận"}
+                                            | 📍 {job.location}
+                                        </small>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* --- FORM NHẬP LIỆU --- */}
+                <div className="bg-white p-6 rounded-xl shadow-md mb-6">
+                    <h3 className="text-2xl font-bold text-dark-800 mb-4">Thông tin cá nhân</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label htmlFor="cv-name" className="block text-sm font-semibold text-gray-700">Họ và Tên</label>
+                            <input type="text" id="cv-name" name="name" value={cvData.name} onChange={handleInputChange} placeholder="Nhập họ tên" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500" />
+                        </div>
+                        <div>
+                            <label htmlFor="cv-email" className="block text-sm font-semibold text-gray-700">Email (Không thể sửa)</label>
+                            <input type="email" id="cv-email" name="email" value={cvData.email} disabled className="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md cursor-not-allowed" />
+                        </div>
+                        <div>
+                            <label htmlFor="cv-phone" className="block text-sm font-semibold text-gray-700">Số điện thoại</label>
+                            <input type="tel" id="cv-phone" name="phone" value={cvData.phone} onChange={handleInputChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500" />
+                        </div>
+                        <div>
+                            <label htmlFor="cv-address" className="block text-sm font-semibold text-gray-700">Địa chỉ</label>
+                            <input type="text" id="cv-address" name="address" value={cvData.address} onChange={handleInputChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500" />
                         </div>
                     </div>
-                )}
-            </div>
-            {/* ------------------------- */}
+                </div>
 
-            {/* Form nhập liệu truyền thống */}
-            <div className="cv-form-section">
-                <h3>Thông tin cá nhân</h3>
-                <div className="cv-form-grid">
-                    <div className="form-group">
-                        <label htmlFor="cv-name">Họ và Tên</label>
-                        <input type="text" id="cv-name" name="name" value={cvData.name} onChange={handleInputChange} placeholder="Nhập họ tên" />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="cv-email">Email (Không thể sửa)</label>
-                        <input type="email" id="cv-email" name="email" value={cvData.email} disabled style={{ backgroundColor: '#f9f9f9', cursor: 'not-allowed' }} />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="cv-phone">Số điện thoại</label>
-                        <input type="tel" id="cv-phone" name="phone" value={cvData.phone} onChange={handleInputChange} />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="cv-address">Địa chỉ</label>
-                        <input type="text" id="cv-address" name="address" value={cvData.address} onChange={handleInputChange} />
+                <div className="bg-white p-6 rounded-xl shadow-md mb-6">
+                    <h3 className="text-2xl font-bold text-dark-800 mb-4">Mục tiêu nghề nghiệp</h3>
+                    <div>
+                        <textarea id="cv-objective" rows="4" name="objective" value={cvData.objective} onChange={handleInputChange} placeholder="Mô tả ngắn gọn về mục tiêu..." className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500"></textarea>
                     </div>
                 </div>
-            </div>
 
-            <div className="cv-form-section" style={{ marginTop: '20px' }}>
-                <h3>Mục tiêu nghề nghiệp</h3>
-                <div className="form-group full-width">
-                    <textarea id="cv-objective" rows="4" name="objective" value={cvData.objective} onChange={handleInputChange} placeholder="Mô tả ngắn gọn về mục tiêu..."></textarea>
-                </div>
-            </div>
-
-            <div className="cv-form-section" style={{ marginTop: '20px' }}>
-                <h3>Kinh nghiệm làm việc (Gần nhất)</h3>
-                <div className="cv-form-grid">
-                    <div className="form-group full-width">
-                        <label htmlFor="cv-company">Tên công ty</label>
-                        <input type="text" id="cv-company" name="experience.company" value={cvData.experience.company} onChange={handleInputChange} />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="cv-position">Vị trí</label>
-                        <input type="text" id="cv-position" name="experience.position" value={cvData.experience.position} onChange={handleInputChange} />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="cv-duration">Thời gian</label>
-                        <input type="text" id="cv-duration" name="experience.duration" value={cvData.experience.duration} onChange={handleInputChange} placeholder="VD: 2021 - Nay" />
-                    </div>
-                    <div className="form-group full-width">
-                        <label htmlFor="cv-description">Mô tả công việc</label>
-                        <textarea id="cv-description" rows="4" name="experience.description" value={cvData.experience.description} onChange={handleInputChange}></textarea>
+                <div className="bg-white p-6 rounded-xl shadow-md mb-6">
+                    <h3 className="text-2xl font-bold text-dark-800 mb-4">Kinh nghiệm làm việc (Gần nhất)</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="md:col-span-2">
+                            <label htmlFor="cv-company" className="block text-sm font-semibold text-gray-700">Tên công ty</label>
+                            <input type="text" id="cv-company" name="experience.company" value={cvData.experience.company} onChange={handleInputChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500" />
+                        </div>
+                        <div>
+                            <label htmlFor="cv-position" className="block text-sm font-semibold text-gray-700">Vị trí</label>
+                            <input type="text" id="cv-position" name="experience.position" value={cvData.experience.position} onChange={handleInputChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500" />
+                        </div>
+                        <div>
+                            <label htmlFor="cv-duration" className="block text-sm font-semibold text-gray-700">Thời gian</label>
+                            <input type="text" id="cv-duration" name="experience.duration" value={cvData.experience.duration} onChange={handleInputChange} placeholder="VD: 2021 - Nay" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500" />
+                        </div>
+                        <div className="md:col-span-2">
+                            <label htmlFor="cv-description" className="block text-sm font-semibold text-gray-700">Mô tả công việc</label>
+                            <textarea id="cv-description" rows="4" name="experience.description" value={cvData.experience.description} onChange={handleInputChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500"></textarea>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <button className="btn" style={{ width: 'auto', marginTop: '20px' }} onClick={handleSave} disabled={loading}>
-                {loading ? <><i className="fas fa-spinner fa-spin"></i> Đang lưu...</> : 'Lưu thay đổi'}
-            </button>
+                <button onClick={handleSave} disabled={loading} className="w-full md:w-auto px-8 py-3 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-lg transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                    {loading ? <><FontAwesomeIcon icon={faSpinner} spin /> Đang lưu...</> : 'Lưu thay đổi'}
+                </button>
+            </div>
         </section>
     );
 }

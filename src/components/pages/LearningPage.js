@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { getLearningResourcesApi } from '../../api/learning_api';
 
+// --- THÊM IMPORT ICON ---
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faExternalLinkAlt } from '@fortawesome/free-solid-svg-icons';
+
 const LearningPage = () => {
     const { user } = useAuth();
     const [resources, setResources] = useState([]);
@@ -24,65 +28,51 @@ const LearningPage = () => {
     useEffect(() => {
         if (user) fetchResources();
         // eslint-disable-next-line
-    }, [topic, difficulty]); // Tự động gọi lại khi filter thay đổi
+    }, [topic, difficulty]);
 
     return (
-        <div className="content-section">
-            <h2>Góc học tập & Phát triển</h2>
-            
-            {/* Bộ lọc */}
-            <div className="filter-bar" style={{display: 'flex', gap: '15px', marginBottom: '20px'}}>
-                <select 
-                    value={topic} onChange={(e) => setTopic(e.target.value)}
-                    style={{padding: '10px', borderRadius: '5px', border: '1px solid #ddd'}}
-                >
-                    <option value="all">Tất cả chủ đề</option>
-                    <option value="Python">Python</option>
-                    <option value="React">ReactJS</option>
-                    <option value="Interview">Phỏng vấn</option>
-                    <option value="Soft Skills">Kỹ năng mềm</option>
-                </select>
+        <section className="min-h-screen bg-gradient-to-br from-dark-50 to-accent-50 py-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 className="text-4xl font-extrabold text-center text-dark-800 mb-8">Góc học tập & Phát triển</h2>
+                
+                <div className="flex flex-wrap gap-4 mb-12 justify-center">
+                    <select value={topic} onChange={(e) => setTopic(e.target.value)} className="px-5 py-3 rounded-lg border border-dark-200 focus:ring-2 focus:ring-accent-500 focus:border-transparent transition-all">
+                        <option value="all">Tất cả chủ đề</option>
+                        <option value="Python">Python</option>
+                        <option value="React">ReactJS</option>
+                        <option value="Interview">Phỏng vấn</option>
+                        <option value="Soft Skills">Kỹ năng mềm</option>
+                    </select>
+                    <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} className="px-5 py-3 rounded-lg border border-dark-200 focus:ring-2 focus:ring-accent-500 focus:border-transparent transition-all">
+                        <option value="all">Tất cả trình độ</option>
+                        <option value="beginner">Cơ bản</option>
+                        <option value="intermediate">Trung bình</option>
+                        <option value="advanced">Nâng cao</option>
+                    </select>
+                </div>
 
-                <select 
-                    value={difficulty} onChange={(e) => setDifficulty(e.target.value)}
-                    style={{padding: '10px', borderRadius: '5px', border: '1px solid #ddd'}}
-                >
-                    <option value="all">Tất cả trình độ</option>
-                    <option value="beginner">Cơ bản</option>
-                    <option value="intermediate">Trung bình</option>
-                    <option value="advanced">Nâng cao</option>
-                </select>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {loading && <p className="text-center col-span-full text-dark-600">Đang tải...</p>}
+                    {!loading && resources.length === 0 && <p className="text-center col-span-full text-dark-600">Chưa có tài liệu nào phù hợp.</p>}
+                    {!loading && resources.map(res => (
+                        <div key={res._id} className="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl relative">
+                            <span className={`absolute top-4 right-4 px-3 py-1 text-xs font-bold rounded-full text-white ${res.type === 'video' ? 'bg-red-500' : 'bg-green-500'}`}>
+                                {res.type === 'video' ? 'Video' : 'Bài viết'}
+                            </span>
+                            <div className="p-6">
+                                <h3 className="text-xl font-bold text-dark-800 mb-2">{res.title}</h3>
+                                <p className="text-dark-600 mb-4 line-clamp-3">{res.description}</p>
+                                <a href={res.url} target="_blank" rel="noreferrer" className="inline-flex items-center font-bold text-primary-600 hover:text-primary-800 transition-colors">
+                                    Xem ngay 
+                                    {/* --- THAY THẾ ICON --- */}
+                                    <FontAwesomeIcon icon={faExternalLinkAlt} className="ml-2" />
+                                </a>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
-
-            {/* Danh sách tài liệu */}
-            <div className="resources-grid" style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px'}}>
-                {loading ? <p>Đang tải...</p> : resources.map(res => (
-                    <div key={res._id} className="resource-card" style={{background: 'white', padding: '20px', borderRadius: '10px', boxShadow: '0 2px 5px rgba(0,0,0,0.1)'}}>
-                        {/* Badge loại tài liệu */}
-                        <span style={{
-                            background: res.type === 'video' ? '#ff4757' : '#2ed573',
-                            color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '12px'
-                        }}>
-                            {res.type === 'video' ? 'Video' : 'Bài viết'}
-                        </span>
-                        
-                        <h3 style={{marginTop: '10px', fontSize: '18px'}}>{res.title}</h3>
-                        <p style={{color: '#666', fontSize: '14px', height: '40px', overflow: 'hidden'}}>{res.description}</p>
-                        
-                        <a 
-                            href={res.url} 
-                            target="_blank" 
-                            rel="noreferrer"
-                            style={{display: 'inline-block', marginTop: '15px', color: '#007bff', textDecoration: 'none', fontWeight: 'bold'}}
-                        >
-                            Xem ngay <i className="fas fa-external-link-alt"></i>
-                        </a>
-                    </div>
-                ))}
-            </div>
-            
-            {!loading && resources.length === 0 && <p style={{textAlign: 'center'}}>Chưa có tài liệu nào phù hợp.</p>}
-        </div>
+        </section>
     );
 };
 
